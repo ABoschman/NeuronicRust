@@ -22,6 +22,7 @@ fn activation(value: f32) -> f32 {
 mod tests {
 
     use compute;
+    use Neuron;
 
     fn or_gate() -> [[f32; 3]; 1] {
         [[0.0, 1.0, 1.0]]
@@ -50,4 +51,94 @@ mod tests {
         let input: [f32; 2] = [0.0, 1.0];
         assert!(compute(or_gate(), input) > 0.9);
     }
+
+    #[test]
+    fn neuron_weighted_sum_empty() {
+        let neuron = Neuron {
+            bias: 0.0,
+            weights: vec!(),
+        };
+        assert_eq!(neuron.weighted_sum(&vec!()), 0.0);
+    }
+
+    #[test]
+    fn neuron_weighted_sum_single_input() {
+        let neuron = Neuron {
+            bias: 0.0,
+            weights: vec!(2.0),
+        };
+        assert_eq!(neuron.weighted_sum(&vec!(3.0)), 6.0);
+    }
+
+    #[test]
+    fn neuron_weighted_sum_two_inputs() {
+        let neuron = Neuron {
+            bias: 0.0,
+            weights: vec!(2.0, 3.0),
+        };
+        assert_eq!(neuron.weighted_sum(&vec!(5.0, 7.0)), 31.0);
+    }
 }
+
+
+/// Converts an array of inputs to
+trait Compute {
+    /// Performs computation on an array of inputs to produce an array of outputs, using some computer.
+    ///
+    /// The number of inputs does not necessarily have to equal the number of outputs.
+    /// All inputs and outputs must be real numbers in the range [0, 1].
+    fn compute(&self, input: &Vec<f32>) -> Vec<f32>;
+}
+
+struct Network {
+    // list of layers.
+    layers: Vec<Layer>
+}
+
+struct Layer {
+    neurons: Vec<Neuron>
+}
+
+struct Neuron {
+    bias: f32,
+    weights: Vec<f32>
+}
+
+impl Neuron {
+
+    fn compute(&self, input: &Vec<f32>) -> f32 {
+        activation(self.bias + self.weighted_sum(input))
+    }
+
+    fn weighted_sum(&self, input: &Vec<f32>) -> f32 {
+        self.weights.iter()
+        .zip(input.iter())
+        .map(|(w, i)| w * i)
+        .sum()
+    }
+}
+
+impl Compute for Layer {
+    fn compute(&self, input: &Vec<f32>) -> Vec<f32> {
+        self.neurons.iter()
+        .map(|neuron| neuron.compute(input))
+        .collect()
+    }
+}
+impl Compute for Network {
+    fn compute(&self, input: &Vec<f32>) -> Vec<f32> {
+        self.layers.iter()
+        .fold(input.to_vec(),|layer_input, layer| layer.compute(&layer_input))
+    }
+}
+
+// impl Compute for Network {
+//     fn compute(input: Vec<f32>) -> Vec<f32> {
+//         //todo
+//     }
+// }
+
+
+
+
+//
