@@ -12,3 +12,10 @@ impl Layer {
             .collect()
     }
 }
+
+#[cfg(test)]
+mod tests {
+
+    use super::*;
+
+}
