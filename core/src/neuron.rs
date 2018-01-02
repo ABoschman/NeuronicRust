@@ -1,9 +1,19 @@
+use rand;
+
+#[derive(Debug)]
 pub struct Neuron {
     bias: f32,
     weights: Vec<f32>
 }
 
 impl Neuron {
+
+    pub fn new_rand(nr_weights: usize) -> Neuron {
+        Neuron {
+            bias: rand::random::<f32>(),
+            weights: (0..nr_weights).map(|i| rand::random::<f32>()).collect()
+        }
+    }
 
     pub fn new(bias: f32, weights: Vec<f32>) -> Neuron {
         Neuron {
